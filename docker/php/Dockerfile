@@ -15,7 +15,7 @@ RUN npm run prod
 
 # ---------------------
 
-FROM php:7.1-fpm
+FROM webdevops/php:7.2
 
 WORKDIR /var/www/html
 
@@ -23,30 +23,8 @@ WORKDIR /var/www/html
 RUN apt update -y \
     && apt install -y ssh git zip bzip2 wget libmcrypt-dev cron mc
 
-# Install PHP extensions
-# todo: libpng12-0 libpng12-dev libjasper-dev
-RUN apt update -y \
-    && apt install -y libpq-dev libpng-dev \
-        libjpeg-dev libjpeg-progs libjpeg62 libfftw3-3 libfftw3-dev libwmf-dev \
-        libx11-dev libxt-dev libxext-dev libxml2-dev libfreetype6-dev libexif-dev \
-        libltdl3-dev graphviz pkg-config libperl-dev perl \
-        libz-dev libbz2-dev libmemcached-dev libtidy-dev zlib1g-dev libicu-dev g++ \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-configure intl \
-    && docker-php-ext-configure gd \
-        --with-freetype-dir=/usr/lib/ \
-        --with-png-dir=/usr/lib/ \
-        --with-jpeg-dir=/usr/lib/ \
-        --with-gd \
-    && docker-php-ext-install pdo_pgsql zip pcntl gd intl mcrypt \
-    && pecl install -o -f redis \
-    && pecl install -o -f memcached \
-    && rm -rf /tmp/pear \
-    && docker-php-ext-enable redis memcached
-
 # composer install: https://hub.docker.com/_/composer?tab=description#php-extensions
-COPY --from=composer /usr/bin/composer /usr/bin/composer
-ENV COMPOSER_ALLOW_SUPERUSER=1
+COPY --from=composer:1 /usr/bin/composer /usr/bin/composer
 
 RUN touch /var/log/cron.log
 
@@ -70,5 +48,7 @@ COPY --from=builder /frontend/public/js ./public/js
 ADD . .
 COPY ./docker/php/.env.template ./.env
 RUN composer dump-autoload
+RUN chown -R $APPLICATION_USER:$APPLICATION_GROUP .
+RUN chmod -R 777 .
 
 ENTRYPOINT ["/root/entrypoint.sh"]

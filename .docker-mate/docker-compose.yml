@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  app:
+    build:
+      context: app/.docker-mate/docker/app
+      args:
+        tag: $PHP_VERSION
+        container: php-dev
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_DATABASE=$DB_NAME
+      - DB_USERNAME=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - GITLAB_PRIVATE_TOKEN=$GITLAB_PRIVATE_TOKEN
+
+  db:
+    image: postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_NAME
+      - POSTGRES_USER=$DB_USER
+
+volumes:
+  db:

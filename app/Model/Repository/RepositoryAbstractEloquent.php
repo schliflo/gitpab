@@ -67,7 +67,7 @@ abstract class RepositoryAbstractEloquent extends BaseRepository
         $this->model->truncate();
     }
 
-    public function count(): int
+    public function count(array $where = [], $columns = ['id']): int
     {
         return $this->model->count();
     }

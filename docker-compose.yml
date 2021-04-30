@@ -5,17 +5,14 @@ volumes:
   db: {}
 
 services:
-
   nginx:
     container_name: gitpab-nginx
     image: nginx:alpine
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-#      - /data/gitpab/nginx/ssl:/etc/ssl
       - code:/var/www/html
     ports:
-      - 8000:80
-      - 8443:443
+      - 8080:80
     depends_on:
       - php
     restart: unless-stopped
@@ -29,8 +26,8 @@ services:
       - code:/var/www/html
     environment:
       GITLAB_PRIVATE_TOKEN: ${token}
-      GITLAB_RESTRICTIONS_PROJECT_IDS: ${projects}
-      GITLAB_HOST: ${host}
+#      GITLAB_RESTRICTIONS_PROJECT_IDS: ${projects}
+      GITLAB_HOST: "https://gitlab.com/"
       APP_LOCALE: en
     links:
       - db
